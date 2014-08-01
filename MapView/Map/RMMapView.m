@@ -347,6 +347,10 @@
                                                object:nil];
 
     RMLog(@"Map initialised. tileSource:%@, minZoom:%f, maxZoom:%f, zoom:%f at {%f,%f}", newTilesource, self.minZoom, self.maxZoom, self.zoom, initialCenterCoordinate.longitude, initialCenterCoordinate.latitude);
+    
+    if ([self.delegate respondsToSelector:@selector(mapViewHasFinishedInitalization)]) {
+        [self.delegate mapViewHasFinishedInitalization];
+    }
 
     [self setNeedsUpdateConstraints];
 }
