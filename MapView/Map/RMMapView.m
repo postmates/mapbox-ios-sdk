@@ -3112,7 +3112,7 @@
 
 
     //user location annotation should always be above all annotations but below active callout
-    self.userLocation.layer.zPosition = MAXFLOAT;
+    self.userLocation.layer.zPosition = MAXFLOAT - 1;
 
     // bring any active callout annotation to the front
     //
