@@ -3110,6 +3110,10 @@
     for (CGFloat i = 0; i < [sortedAnnotations count]; i++)
         ((RMAnnotation *)[sortedAnnotations objectAtIndex:i]).layer.zPosition = (CGFloat)i;
 
+
+    //user location annotation should always be above all annotations but below active callout
+    self.userLocation.layer.zPosition = MAXFLOAT;
+
     // bring any active callout annotation to the front
     //
     if (_currentAnnotation)
