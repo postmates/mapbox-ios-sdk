@@ -3485,7 +3485,7 @@
         _accuracyCircleAnnotation.clusteringEnabled = NO;
         _accuracyCircleAnnotation.enabled = NO;
         _accuracyCircleAnnotation.layer = [[RMCircle alloc] initWithView:self radiusInMeters:newLocation.horizontalAccuracy];
-        _accuracyCircleAnnotation.layer.zPosition = gMAXFLOAT;
+        _accuracyCircleAnnotation.layer.zPosition = MAXFLOAT;
         _accuracyCircleAnnotation.isUserLocationAnnotation = YES;
 
         ((RMCircle *)_accuracyCircleAnnotation.layer).lineColor = (RMPreVersion7 ? [UIColor colorWithRed:0.378 green:0.552 blue:0.827 alpha:0.7] : [UIColor clearColor]);
