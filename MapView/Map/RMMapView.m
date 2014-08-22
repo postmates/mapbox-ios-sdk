@@ -1903,6 +1903,7 @@
         if (anAnnotation.layer.canShowCallout && anAnnotation.title)
         {
             _currentCallout = [SMCalloutView platformCalloutView];
+            _currentCallout.delegate = self;
 
             if (RMPostVersion7)
                 _currentCallout.tintColor = self.tintColor;
@@ -3953,6 +3954,14 @@
 
                          [transitionContext completeTransition:YES];
                      }];
+}
+
+#pragma mark - SMCalloutView Delegate Methods
+- (void)calloutViewClicked:(SMCalloutView *)calloutView
+{
+    if [(self.delegate respondsToSelector:@selector(calloutViewClicked:)) ] {
+        [self.delegate calloutViewClicked:calloutView];g
+    }
 }
 
 @end

@@ -30,6 +30,7 @@
 @class RMMarker;
 @class RMAnnotation;
 @class RMUserLocation;
+@class SMCalloutView;
 
 typedef enum : NSUInteger {
     RMMapLayerDragStateNone = 0,
@@ -229,5 +230,11 @@ typedef enum : NSUInteger {
  *
  */
 - (void)mapViewHasFinishedInitalization;
+
+/**
+ *  Called when a callout has been tapped
+ *
+ */
+- (void)calloutClicked:(SMCalloutView *)calloutView;
 
 @end
