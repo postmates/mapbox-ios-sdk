@@ -3959,7 +3959,7 @@
 #pragma mark - SMCalloutView Delegate Methods
 - (void)calloutViewClicked:(SMCalloutView *)calloutView
 {
-    if ([self.delegate respondsToSelector:@selector(calloutViewClicked:)]) {
+    if ([self.delegate respondsToSelector:@selector(calloutClicked:)]) {
         [self.delegate calloutClicked:calloutView];
     }
 }
