@@ -169,6 +169,8 @@
     RMFractalTileProjection *_mercatorToTileProjection;
     RMTileSourcesContainer *_tileSourcesContainer;
 
+    NSMutableArray *_earlyTileSources;
+
     NSMutableSet *_annotations;
     NSMutableSet *_visibleAnnotations;
 
@@ -299,13 +301,33 @@
         [self setBackgroundView:nil];
     }
 
-    if (initialTileSourceMinZoomLevel < newTilesource.minZoom) initialTileSourceMinZoomLevel = newTilesource.minZoom;
-    if (initialTileSourceMaxZoomLevel > newTilesource.maxZoom) initialTileSourceMaxZoomLevel = newTilesource.maxZoom;
+    if ([_earlyTileSources count])
+    {
+        for (id<RMTileSource>earlyTileSource in _earlyTileSources)
+        {
+            if (initialTileSourceMinZoomLevel < earlyTileSource.minZoom) initialTileSourceMinZoomLevel = earlyTileSource.minZoom;
+            if (initialTileSourceMaxZoomLevel > earlyTileSource.maxZoom) initialTileSourceMaxZoomLevel = earlyTileSource.maxZoom;
+        }
+    }
+    else
+    {
+        if (initialTileSourceMinZoomLevel < newTilesource.minZoom) initialTileSourceMinZoomLevel = newTilesource.minZoom;
+        if (initialTileSourceMaxZoomLevel > newTilesource.maxZoom) initialTileSourceMaxZoomLevel = newTilesource.maxZoom;
+    }
     [self setTileSourcesMinZoom:initialTileSourceMinZoomLevel];
     [self setTileSourcesMaxZoom:initialTileSourceMaxZoomLevel];
     [self setTileSourcesZoom:initialTileSourceZoomLevel];
 
-    [self setTileSource:newTilesource];
+    if ([_earlyTileSources count])
+    {
+        [self setTileSources:_earlyTileSources];
+        [_earlyTileSources removeAllObjects];
+    }
+    else
+    {
+        [self setTileSource:newTilesource];
+    }
+
     [self setCenterCoordinate:initialCenterCoordinate animated:NO];
 
     [self setDecelerationMode:RMMapDecelerationFast];
@@ -382,12 +404,24 @@
     if (!newTilesource || !(self = [super initWithFrame:frame]))
         return nil;
 
+    _earlyTileSources = [NSMutableArray array];
+
     [self performInitializationWithTilesource:newTilesource
                              centerCoordinate:initialCenterCoordinate
                                     zoomLevel:initialZoomLevel
                                  maxZoomLevel:maxZoomLevel
                                  minZoomLevel:minZoomLevel
                               backgroundImage:backgroundImage];
+
+    return self;
+}
+
+- (id)initWithCoder:(NSCoder *)decoder
+{
+    if (![super initWithCoder:decoder])
+        return nil;
+
+    _earlyTileSources = [NSMutableArray array];
 
     return self;
 }
@@ -521,20 +555,17 @@
         if ( ! [[viewController.view valueForKeyPath:@"constraints.firstItem"]  containsObject:container] &&
              ! [[viewController.view valueForKeyPath:@"constraints.secondItem"] containsObject:container])
         {
-            CGFloat topSpacing   = container.frame.origin.y;
-            CGFloat rightSpacing = container.superview.bounds.size.width - container.frame.origin.x;
-
             [viewController.view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[topLayoutGuide]-topSpacing-[container]"
                                                                                         options:0
-                                                                                        metrics:@{ @"topSpacing" : @(topSpacing) }
+                                                                                        metrics:@{ @"topSpacing"     : @(5) }
                                                                                           views:@{ @"topLayoutGuide" : viewController.topLayoutGuide,
                                                                                                    @"container"      : container }]];
 
 
             [viewController.view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:[container]-rightSpacing-|"
                                                                                         options:0
-                                                                                        metrics:@{ @"rightSpacing" : @(rightSpacing) }
-                                                                                          views:@{ @"container" : container }]];
+                                                                                        metrics:@{ @"rightSpacing" : @(5) }
+                                                                                          views:@{ @"container"    : container }]];
         }
     }
 
@@ -543,9 +574,6 @@
         if ( ! [[viewController.view valueForKeyPath:@"constraints.firstItem"]  containsObject:_logoBug] &&
              ! [[viewController.view valueForKeyPath:@"constraints.secondItem"] containsObject:_logoBug])
         {
-            CGFloat leftSpacing   = _logoBug.frame.origin.x;
-            CGFloat bottomSpacing = _logoBug.superview.bounds.size.height - _logoBug.frame.origin.y - _logoBug.bounds.size.height;
-
             NSString *formatString;
             NSDictionary *views;
 
@@ -563,12 +591,12 @@
 
             [viewController.view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:formatString
                                                                                         options:0
-                                                                                        metrics:@{ @"bottomSpacing" : @(bottomSpacing) }
+                                                                                        metrics:@{ @"bottomSpacing" : @(4) }
                                                                                           views:views]];
 
             [viewController.view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-leftSpacing-[logoBug]"
                                                                                         options:0
-                                                                                        metrics:@{ @"leftSpacing" : @(leftSpacing) }
+                                                                                        metrics:@{ @"leftSpacing" : @(8) }
                                                                                           views:views]];
         }
     }
@@ -578,9 +606,6 @@
         if ( ! [[viewController.view valueForKeyPath:@"constraints.firstItem"]  containsObject:_attributionButton] &&
              ! [[viewController.view valueForKeyPath:@"constraints.secondItem"] containsObject:_attributionButton])
         {
-            CGFloat rightSpacing  = _attributionButton.superview.bounds.size.width - _attributionButton.frame.origin.x - _attributionButton.bounds.size.width;
-            CGFloat bottomSpacing = _attributionButton.superview.bounds.size.height - _attributionButton.frame.origin.y - _attributionButton.bounds.size.height;
-
             NSString *formatString;
             NSDictionary *views;
 
@@ -598,12 +623,12 @@
 
             [viewController.view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:formatString
                                                                                         options:0
-                                                                                        metrics:@{ @"bottomSpacing" : @(bottomSpacing) }
+                                                                                        metrics:@{ @"bottomSpacing" : @(8) }
                                                                                           views:views]];
 
             [viewController.view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:[attributionButton]-rightSpacing-|"
                                                                                         options:0
-                                                                                        metrics:@{ @"rightSpacing" : @(rightSpacing) }
+                                                                                        metrics:@{ @"rightSpacing" : @(8) }
                                                                                           views:views]];
         }
     }
@@ -2125,6 +2150,16 @@
 
 - (void)setTileSources:(NSArray *)tileSources
 {
+    if ( ! _tileSourcesContainer)
+    {
+        // If we've reached this point, it's because our scroll view etc.
+        // aren't yet setup. So let's remember the tile source(s) set so that
+        // we can apply them later on once we're properly initialized.
+        //
+        [_earlyTileSources setArray:tileSources];
+        return;
+    }
+
     if ( ! [_tileSourcesContainer setTileSources:tileSources])
         return;
 
@@ -2153,6 +2188,16 @@
 
 - (void)addTileSource:(id<RMTileSource>)newTileSource atIndex:(NSUInteger)index
 {
+    if ( ! _tileSourcesContainer)
+    {
+        // If we've reached this point, it's because our scroll view etc.
+        // aren't yet setup. So let's remember the tile source(s) set so that
+        // we can apply them later on once we're properly initialized.
+        //
+        [_earlyTileSources insertObject:newTileSource atIndex:(index > [_earlyTileSources count] ? 0 : index)];
+        return;
+    }
+
     if ([_tileSourcesContainer.tileSources containsObject:newTileSource])
         return;
 
@@ -3237,6 +3282,17 @@
         self.userLocation = [RMUserLocation annotationWithMapView:self coordinate:CLLocationCoordinate2DMake(MAXFLOAT, MAXFLOAT) andTitle:nil];
 
         _locationManager = [CLLocationManager new];
+
+#if __IPHONE_OS_VERSION_MAX_ALLOWED >= 80000
+        // enable iOS 8+ location authorization API
+        //
+        if ([CLLocationManager instancesRespondToSelector:@selector(requestWhenInUseAuthorization)])
+        {
+            NSAssert([[[NSBundle mainBundle] infoDictionary] valueForKey:@"NSLocationWhenInUseUsageDescription"], @"For iOS 8 and above, your app must have a value for NSLocationWhenInUseUsageDescription in its Info.plist");
+            [_locationManager requestWhenInUseAuthorization];
+        }
+#endif
+
         _locationManager.headingFilter = 5.0;
         _locationManager.delegate = self;
         [_locationManager startUpdatingLocation];
@@ -3433,7 +3489,12 @@
         self.userLocation.location = newLocation;
 
         if (_delegateHasDidUpdateUserLocation)
+        {
             [_delegate mapView:self didUpdateUserLocation:self.userLocation];
+
+            if ( ! _showsUserLocation)
+                return;
+        }
     }
 
     if (self.userTrackingMode != RMUserTrackingModeNone)
@@ -3609,7 +3670,12 @@
     self.userLocation.heading = newHeading;
 
     if (_delegateHasDidUpdateUserLocation)
+    {
         [_delegate mapView:self didUpdateUserLocation:self.userLocation];
+
+        if ( ! _showsUserLocation)
+            return;
+    }
 
     CLLocationDirection headingDirection = (newHeading.trueHeading > 0 ? newHeading.trueHeading : newHeading.magneticHeading);
 
@@ -3787,8 +3853,8 @@
         _attributionButton.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleLeftMargin;
         _attributionButton.translatesAutoresizingMaskIntoConstraints = NO;
         [_attributionButton addTarget:self action:@selector(showAttribution:) forControlEvents:UIControlEventTouchUpInside];
-        _attributionButton.frame = CGRectMake(self.bounds.size.width  - 30,
-                                              self.bounds.size.height - 30,
+        _attributionButton.frame = CGRectMake(self.bounds.size.width - _attributionButton.bounds.size.width - 8,
+                                              self.bounds.size.height - _attributionButton.bounds.size.height - 8,
                                               _attributionButton.bounds.size.width,
                                               _attributionButton.bounds.size.height);
         [self addSubview:_attributionButton];
