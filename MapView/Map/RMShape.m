@@ -73,7 +73,7 @@
     shapeLayer.lineWidth = lineWidth;
     shapeLayer.lineCap = kCALineCapButt;
     shapeLayer.lineJoin = kCALineJoinMiter;
-    shapeLayer.strokeColor = [UIColor blackColor].CGColor;
+    shapeLayer.strokeColor = [UIColor clearColor].CGColor;
     shapeLayer.fillColor = [UIColor clearColor].CGColor;
     shapeLayer.shadowRadius = 0.0;
     shapeLayer.shadowOpacity = 0.0;
