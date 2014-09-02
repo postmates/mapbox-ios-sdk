@@ -28,9 +28,7 @@
 // RMDBMap source is an implementation of an sqlite tile source which is 
 // can be used as an offline map store. 
 //
-// The implementation expects two tables in the database:
-//
-// table "preferences" - contains the map meta data as name/value pairs
+// The implementation expects two tables in the database:d// table "preferences" - contains the map meta data as name/value pairs
 //
 //    SQL: create table preferences(name text primary key, value text)
 //

@@ -379,6 +379,8 @@
 
 - (id)initWithFrame:(CGRect)frame
 {
+    RMMapboxSource *defaultMapboxSource = [[RMMapboxSource alloc] init];
+    defaultMapboxSource.imageQuality = RMMapboxSourceQualityJPEG70;
     return [self initWithFrame:frame andTilesource:[RMMapboxSource new]];
 }
 
